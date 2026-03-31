@@ -1,0 +1,4 @@
+venv/
+uploads/
+serviceAccountKey.json
+__pycache__/
