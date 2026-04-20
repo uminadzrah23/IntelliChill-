@@ -8,50 +8,50 @@
   <style>
     .steps-bar { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:2rem; }
     .step { display:flex; flex-direction:column; align-items:center; gap:6px; }
-    .step-circle { width:36px; height:36px; border-radius:50%; border:2px solid var(--border); background:var(--card); color:var(--muted); font-weight:600; font-size:0.85rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
-    .step.active .step-circle { background:var(--nav-bg); border-color:var(--nav-bg); color:#fff; }
+    .step-circle { width:38px; height:38px; border-radius:50%; border:2px solid var(--border); background:var(--card); color:var(--muted); font-weight:700; font-size:0.85rem; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+    .step.active .step-circle { background:var(--nav-bg); border-color:var(--nav-bg); color:#fff; box-shadow:0 0 0 4px rgba(13,31,16,0.12); }
     .step.done .step-circle   { background:var(--green);  border-color:var(--green);  color:#fff; }
-    .step-label { font-size:0.72rem; color:var(--muted); white-space:nowrap; }
-    .step.active .step-label { color:var(--nav-bg); font-weight:600; }
+    .step-label { font-size:0.72rem; color:var(--muted); white-space:nowrap; font-weight:500; }
+    .step.active .step-label { color:var(--nav-bg); font-weight:700; }
     .step.done .step-label   { color:var(--green); }
-    .step-line { flex:1; height:2px; background:var(--border); margin:0 8px; margin-bottom:22px; transition:background 0.3s; min-width:40px; }
+    .step-line { flex:1; height:2px; background:var(--border); margin:0 10px; margin-bottom:24px; transition:background 0.3s; min-width:40px; border-radius:2px; }
     .step-line.done { background:var(--green); }
-    .upload-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:2.5rem 1rem; text-align:center; cursor:pointer; transition:all 0.2s; background:#fafbfa; position:relative; }
+    .upload-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:2.8rem 1rem; text-align:center; cursor:pointer; transition:all 0.2s; background:#fafcfa; position:relative; }
     .upload-zone:hover, .upload-zone.dragover { border-color:var(--green); background:var(--green-light); }
-    .upload-zone .icon { font-size:2.5rem; margin-bottom:10px; }
+    .upload-zone .icon { font-size:2.8rem; margin-bottom:12px; }
     .upload-zone p { color:var(--muted); font-size:0.9rem; }
     .upload-zone p strong { color:var(--green); }
-    .upload-zone .file-types { font-size:0.75rem; color:var(--muted); margin-top:6px; opacity:0.7; }
+    .upload-zone .file-types { font-size:0.74rem; color:var(--muted); margin-top:8px; opacity:0.7; }
     #file-input { display:none; }
     #preview-container { display:none; margin-top:14px; position:relative; }
-    #preview-img { width:100%; max-height:220px; object-fit:cover; border-radius:8px; border:1px solid var(--border); }
-    .preview-change { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:0.75rem; cursor:pointer; }
-    .btn-scan { width:100%; background:var(--nav-bg); color:#fff; border:none; padding:14px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; transition:background 0.2s; margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:8px; }
-    .btn-scan:hover    { background:#253d2a; }
-    .btn-scan:disabled { background:#b0b8ad; cursor:not-allowed; }
+    #preview-img { width:100%; max-height:220px; object-fit:cover; border-radius:10px; border:1px solid var(--border); }
+    .preview-change { position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:#fff; border:none; padding:5px 12px; border-radius:999px; font-size:0.75rem; cursor:pointer; font-family:'Outfit',sans-serif; font-weight:500; }
+    .btn-scan { width:100%; background:var(--nav-bg); color:#fff; border:none; padding:15px; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .btn-scan:hover { background:#1a3a1f; transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+    .btn-scan:disabled { background:#c5cec6; cursor:not-allowed; transform:none; box-shadow:none; }
     .scan-loader { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
     @keyframes spin { to{transform:rotate(360deg)} }
-    #result-box { display:none; margin-top:1.2rem; border-radius:var(--radius); overflow:hidden; animation:fadeUp 0.4s ease; }
+    #result-box { display:none; margin-top:1.2rem; border-radius:var(--radius-sm); overflow:hidden; animation:fadeUp 0.4s ease; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .result-header { background:var(--green); color:#fff; padding:10px 16px; font-size:0.82rem; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
-    .result-body { background:var(--green-light); border:1px solid #a8dfc5; border-top:none; padding:1rem 1.2rem; }
-    .result-food-name { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; color:#0e7a50; }
-    .result-confidence { font-size:0.8rem; color:var(--green); margin-top:2px; }
+    .result-header { background:var(--green); color:#fff; padding:10px 18px; font-size:0.8rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+    .result-body { background:var(--green-light); border:1px solid var(--green-mid); border-top:none; padding:1rem 1.4rem; }
+    .result-food-name { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:#0d7a58; }
+    .result-confidence { font-size:0.8rem; color:var(--green); margin-top:3px; font-weight:500; }
     #manual-form { display:none; margin-top:1.2rem; animation:fadeUp 0.4s ease; }
     .form-group { margin-bottom:1rem; }
-    .form-group label { display:block; font-size:0.82rem; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em; }
-    .form-group input { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--text); background:var(--card); outline:none; transition:border-color 0.2s; }
-    .form-group input:focus { border-color:var(--green); }
-    .btn-save { width:100%; background:var(--green); color:#fff; border:none; padding:14px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; transition:background 0.2s; margin-top:0.5rem; display:flex; align-items:center; justify-content:center; gap:8px; }
-    .btn-save:hover    { background:#0e7a50; }
-    .btn-save:disabled { background:#b0b8ad; cursor:not-allowed; }
-    #toast { position:fixed; bottom:24px; right:24px; background:var(--nav-bg); color:#fff; padding:12px 20px; border-radius:10px; font-size:0.88rem; opacity:0; transform:translateY(10px); transition:all 0.3s ease; z-index:999; pointer-events:none; }
+    .form-group label { display:block; font-size:0.78rem; font-weight:700; color:var(--muted); margin-bottom:7px; text-transform:uppercase; letter-spacing:0.06em; }
+    .form-group input { width:100%; padding:11px 16px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:0.9rem; color:var(--text); background:var(--card); outline:none; transition:all 0.2s; }
+    .form-group input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(22,163,127,0.12); }
+    .btn-save { width:100%; background:var(--green); color:#fff; border:none; padding:15px; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:0.5rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .btn-save:hover { background:#0d8a6a; transform:translateY(-1px); box-shadow:0 4px 14px rgba(22,163,127,0.3); }
+    .btn-save:disabled { background:#c5cec6; cursor:not-allowed; transform:none; box-shadow:none; }
+    .save-loader { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+    #toast { position:fixed; bottom:28px; right:28px; background:var(--nav-bg); color:#fff; padding:13px 22px; border-radius:999px; font-size:0.88rem; font-weight:500; opacity:0; transform:translateY(12px); transition:all 0.3s ease; z-index:999; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.15); }
     #toast.show { opacity:1; transform:translateY(0); }
-    .divider { text-align:center; color:var(--muted); font-size:0.8rem; margin:1rem 0; position:relative; }
+    .divider { text-align:center; color:var(--muted); font-size:0.8rem; margin:1.2rem 0; position:relative; font-weight:500; }
     .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background:var(--border); }
     .divider::before { left:0; }
     .divider::after  { right:0; }
-    .save-loader { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
   </style>
 </head>
 <body>
@@ -108,7 +108,7 @@
         <div class="result-header">✅ Food Detected!</div>
         <div class="result-body">
           <div class="result-food-name" id="result-food-name">Apple</div>
-          <div class="result-confidence" id="result-confidence">Confidence: 94%</div>
+          <div class="result-confidence" id="result-confidence">Detected by AI</div>
         </div>
       </div>
 
@@ -137,14 +137,12 @@
 
   <div id="toast"></div>
 
-  <!-- ✅ FIREBASE SDK -->
   <script type="module">
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, collection, addDoc }
       from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    // ✅ FIREBASE CONFIG (T3)
     const firebaseConfig = {
       apiKey:            "AIzaSyCH3exGIRj84tezVtgKJ9U93ERa6ubgE-w",
       authDomain:        "intellichill.firebaseapp.com",
@@ -156,13 +154,31 @@
 
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
-
-    // ✅ EXACT FIELD NAMES FROM T3
     const COLLECTION = "food_id";
 
-    // =============================================
-    // UI ELEMENTS
-    // =============================================
+    // ✅ SMART EXPIRY — science-based shelf life by food type
+    const EXPIRY_DAYS = {
+      apple:8, banana:5, orange:10, grape:7, strawberry:3, watermelon:5,
+      mango:5, lemon:14, milk:7, egg:21, bread:5, carrot:14, broccoli:5,
+      tomato:7, chicken:2, fish:2, rice:180, cheese:14, butter:30,
+      lettuce:7, spinach:5, potato:21, onion:30, garlic:60, cucumber:7,
+      avocado:4, pear:5, peach:4, plum:4, blueberry:7, raspberry:3,
+    };
+
+    function getSmartExpiry(foodName) {
+      const name = foodName.toLowerCase();
+      for (const [key, days] of Object.entries(EXPIRY_DAYS)) {
+        if (name.includes(key)) {
+          const d = new Date();
+          d.setDate(d.getDate() + days);
+          return { date: d.toISOString().split('T')[0], days };
+        }
+      }
+      const d = new Date();
+      d.setDate(d.getDate() + 7);
+      return { date: d.toISOString().split('T')[0], days: 7 };
+    }
+
     const fileInput      = document.getElementById('file-input');
     const uploadZone     = document.getElementById('upload-zone');
     const previewCont    = document.getElementById('preview-container');
@@ -179,18 +195,13 @@
     const saveLabel      = document.getElementById('save-label');
     const saveLoader     = document.getElementById('save-loader');
 
-    // Set today's date as default
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('input-date-added').value = today;
+    document.getElementById('input-date-added').value = new Date().toISOString().split('T')[0];
 
-    // =============================================
-    // FILE UPLOAD
-    // =============================================
     fileInput.addEventListener('change', function () {
       const file = this.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = e => {
         previewImg.src = e.target.result;
         previewCont.style.display = 'block';
         scanBtn.disabled = false;
@@ -201,7 +212,6 @@
       reader.readAsDataURL(file);
     });
 
-    // Drag and drop
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
     uploadZone.addEventListener('drop', e => {
@@ -214,24 +224,17 @@
       }
     });
 
-    // =============================================
-    // STEP PROGRESS
-    // =============================================
     function setStep(n) {
       for (let i = 1; i <= 3; i++) {
-        const step = document.getElementById('step' + i);
-        step.classList.remove('active', 'done');
-        if (i < n)  step.classList.add('done');
-        if (i === n) step.classList.add('active');
+        const s = document.getElementById('step' + i);
+        s.classList.remove('active','done');
+        if (i < n) s.classList.add('done');
+        if (i === n) s.classList.add('active');
       }
-      for (let i = 1; i <= 2; i++) {
+      for (let i = 1; i <= 2; i++)
         document.getElementById('line' + i).classList.toggle('done', i < n);
-      }
     }
 
-    // =============================================
-    // ✅ SCAN FOOD — Connected to T2 Flask API
-    // =============================================
     window.scanFood = async function() {
       scanBtn.disabled = true;
       scanLabel.style.display = 'none';
@@ -242,38 +245,30 @@
       setStep(2);
 
       try {
-        // ✅ Send image to T2's Flask API
         const formData = new FormData();
-        formData.append('image', fileInput.files[0]);
+        formData.append('file', fileInput.files[0]);
 
-        const res = await fetch('http://127.0.0.1:5000/detect', {
+        const res = await fetch('https://unsounded-kristi-gapingly.ngrok-free.dev/detect', {
           method: 'POST',
+          headers: { 'ngrok-skip-browser-warning': 'true' },
           body: formData
         });
 
         if (!res.ok) throw new Error('Server error: ' + res.status);
-
         const data = await res.json();
+        const foodName = data.detected_food || '';
 
-        // ✅ T2 returns { "detected_food": "Apple" }
-        const foodName = data.detected_food || 'Unknown';
+        scanLabel.style.display = 'inline';
+        scanLoader.style.display = 'none';
+        scanBtn.disabled = false;
 
-        if (foodName === 'No object detected') {
-          // No food found in image
+        if (!foodName || foodName === 'No object detected') {
           showToast('⚠️ No food detected. Try a clearer photo!');
-          scanLabel.style.display = 'inline';
-          scanLoader.style.display = 'none';
-          scanBtn.disabled = false;
           setStep(1);
         } else {
-          // Food detected successfully!
-          scanLabel.style.display = 'inline';
-          scanLoader.style.display = 'none';
-          scanBtn.disabled = false;
-          showResult(foodName, null);
+          showResult(foodName);
           setStep(3);
         }
-
       } catch (err) {
         console.error('Flask API error:', err);
         showToast('⚠️ Could not connect to AI. Is Flask running?');
@@ -284,48 +279,37 @@
       }
     };
 
-    function showResult(foodName, confidence) {
+    function showResult(foodName) {
+      const smart = getSmartExpiry(foodName);
       resultFoodName.textContent = foodName;
-      resultConf.textContent = confidence ? 'Confidence: ' + confidence + '%' : '✅ Detected by AI';
+      resultConf.textContent = '✅ Detected by AI · Suggested expiry: ' + smart.days + ' days';
       resultBox.style.display = 'block';
       manualDivider.style.display = 'block';
       manualForm.style.display = 'block';
       document.getElementById('input-food-name').value = foodName;
-      const expiry = new Date();
-      expiry.setDate(expiry.getDate() + 7);
-      document.getElementById('input-expiry-date').value = expiry.toISOString().split('T')[0];
+      document.getElementById('input-expiry-date').value = smart.date;
     }
 
-    // =============================================
-    // ✅ SAVE TO FIREBASE (T3 field names)
-    // =============================================
     window.saveFood = async function() {
       const name   = document.getElementById('input-food-name').value.trim();
       const added  = document.getElementById('input-date-added').value;
       const expiry = document.getElementById('input-expiry-date').value;
 
-      if (!name || !added || !expiry) {
-        showToast('⚠️ Please fill in all fields!');
-        return;
-      }
+      if (!name || !added || !expiry) { showToast('⚠️ Please fill in all fields!'); return; }
 
-      // Show saving spinner
       saveBtn.disabled = true;
       saveLabel.style.display = 'none';
       saveLoader.style.display = 'block';
 
       try {
-        // ✅ Save to Firebase using T3's exact field names
         await addDoc(collection(db, COLLECTION), {
-          food_name:         name,
-          date_added:        added,
-          estimated_expiry:  expiry,
-          expiry_date:       null
+          food_name:        name,
+          date_added:       added,
+          estimated_expiry: expiry,
+          expiry_date:      null
         });
-
         showToast('✅ ' + name + ' saved to dashboard!');
         setTimeout(() => window.location.href = 'index.html', 1500);
-
       } catch (err) {
         console.error('Firebase save error:', err);
         showToast('⚠️ Could not save. Check Firebase connection.');
@@ -336,12 +320,11 @@
     };
 
     function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
     }
   </script>
-
 </body>
 </html>
