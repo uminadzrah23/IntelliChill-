@@ -6,67 +6,57 @@
   <title>FoodTrack – Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ── SEARCH & FILTER ── */
     .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:1.5rem; }
-    .search-bar input { flex:1; padding:11px 18px; border:1px solid var(--border); border-radius:999px; font-family:'Outfit',sans-serif; font-size:0.9rem; background:var(--card); color:var(--text); outline:none; transition:all 0.2s; box-shadow:var(--shadow); }
-    .search-bar input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(22,163,127,0.12); }
-    .filter-btn { padding:9px 18px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-family:'Outfit',sans-serif; font-size:0.83rem; font-weight:500; cursor:pointer; color:var(--muted); transition:all 0.2s; box-shadow:var(--shadow); white-space:nowrap; }
-    .filter-btn:hover { border-color:var(--green); color:var(--green); }
-    .filter-btn.active { background:var(--nav-bg); color:#fff; border-color:var(--nav-bg); }
+    .search-bar input { flex:1; padding:10px 16px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.9rem; background:var(--card); color:var(--text); outline:none; transition:border-color 0.2s; }
+    .search-bar input:focus { border-color:var(--green); }
+    .filter-btn { padding:10px 16px; border:1px solid var(--border); border-radius:8px; background:var(--card); font-family:'DM Sans',sans-serif; font-size:0.85rem; cursor:pointer; color:var(--muted); transition:all 0.2s; }
+    .filter-btn:hover, .filter-btn.active { background:var(--nav-bg); color:#fff; border-color:var(--nav-bg); }
     .filter-btn.green.active  { background:var(--green);  border-color:var(--green);  color:#fff; }
     .filter-btn.yellow.active { background:var(--yellow); border-color:var(--yellow); color:#fff; }
     .filter-btn.red.active    { background:var(--red);    border-color:var(--red);    color:#fff; }
-
-    /* ── ANIMATIONS ── */
-    .sum-card { animation:fadeUp 0.5s ease both; }
-    .sum-card:nth-child(1) { animation-delay:0.08s; }
-    .sum-card:nth-child(2) { animation-delay:0.16s; }
-    .sum-card:nth-child(3) { animation-delay:0.24s; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .sum-card { animation:fadeUp 0.4s ease both; }
+    .sum-card:nth-child(1) { animation-delay:0.1s; }
+    .sum-card:nth-child(2) { animation-delay:0.2s; }
+    .sum-card:nth-child(3) { animation-delay:0.3s; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .progress-section { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:1.2rem 1.4rem; margin-bottom:2rem; box-shadow:var(--shadow); }
+    .progress-label { display:flex; justify-content:space-between; font-size:0.82rem; color:var(--muted); margin-bottom:8px; }
+    .progress-bar-bg { height:8px; background:var(--bg); border-radius:10px; overflow:hidden; display:flex; gap:2px; }
+    .progress-fill { height:100%; border-radius:10px; transition:width 0.6s ease; }
+    .progress-fill.green  { background:var(--green); }
+    .progress-fill.yellow { background:var(--yellow); }
+    .progress-fill.red    { background:var(--red); }
     tbody tr { animation:fadeIn 0.3s ease both; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
-
-    /* ── DELETE BUTTON ── */
-    .btn-delete { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:6px 10px; border-radius:8px; transition:all 0.2s; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .btn-delete { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:4px 8px; border-radius:6px; transition:all 0.2s; }
     .btn-delete:hover { background:var(--red-light); color:var(--red); }
-    .days-left { font-size:0.8rem; color:var(--muted); font-weight:500; }
-
-    /* ── TOAST ── */
-    #toast { position:fixed; bottom:28px; right:28px; background:var(--nav-bg); color:#fff; padding:13px 22px; border-radius:999px; font-size:0.88rem; font-weight:500; opacity:0; transform:translateY(12px); transition:all 0.3s ease; z-index:999; pointer-events:none; box-shadow:var(--shadow-lg); }
+    .days-left { font-size:0.78rem; color:var(--muted); }
+    #toast { position:fixed; bottom:24px; right:24px; background:var(--nav-bg); color:#fff; padding:12px 20px; border-radius:10px; font-size:0.88rem; opacity:0; transform:translateY(10px); transition:all 0.3s ease; z-index:999; pointer-events:none; }
     #toast.show { opacity:1; transform:translateY(0); }
-
-    /* ── EMPTY / LOADING ── */
-    .no-results { text-align:center; padding:2.5rem; color:var(--muted); font-size:0.9rem; }
-    .loading-state { text-align:center; padding:3.5rem; color:var(--muted); font-size:0.9rem; }
-    .spinner { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 14px; }
+    .no-results { text-align:center; padding:2rem; color:var(--muted); font-size:0.9rem; }
+    .loading-state { text-align:center; padding:3rem; color:var(--muted); font-size:0.9rem; }
+    .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 12px; }
     @keyframes spin { to{transform:rotate(360deg)} }
-
-    /* ── ALERT SYSTEM ── */
-    #alert-container { display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem; }
-    .alert-banner { display:flex; align-items:center; justify-content:space-between; padding:13px 18px 13px 20px; border-radius:var(--radius-sm); border-left:4px solid; animation:slideIn 0.4s ease both; gap:14px; box-shadow:var(--shadow); }
-    @keyframes slideIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
-    .alert-banner.alert-red    { background:#fff5f5; border-left-color:var(--red); border:1px solid #fecaca; border-left:4px solid var(--red); }
-    .alert-banner.alert-yellow { background:#fffbeb; border-left-color:var(--yellow); border:1px solid #fde68a; border-left:4px solid var(--yellow); }
-    .alert-banner.alert-green  { background:#f0fdf8; border-left-color:var(--green); border:1px solid var(--green-mid); border-left:4px solid var(--green); }
-    .alert-content { flex:1; }
-    .alert-title { font-weight:700; font-size:0.88rem; margin-bottom:2px; }
-    .alert-red .alert-title    { color:#991b1b; }
-    .alert-yellow .alert-title { color:#92400e; }
-    .alert-green .alert-title  { color:#065f46; }
-    .alert-message { font-size:0.81rem; }
-    .alert-red .alert-message    { color:#b91c1c; }
-    .alert-yellow .alert-message { color:#b45309; }
-    .alert-green .alert-message  { color:#047857; }
-    .alert-dismiss { border:none; padding:5px 14px; border-radius:999px; font-size:0.76rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s; font-family:'Outfit',sans-serif; }
-    .alert-dismiss:hover { opacity:0.85; transform:scale(0.97); }
-    .alert-red .alert-dismiss    { background:var(--red);    color:#fff; }
-    .alert-yellow .alert-dismiss { background:var(--yellow); color:#fff; }
-    .alert-green .alert-dismiss  { background:var(--green);  color:#fff; }
-
-    /* ── TABLE FOOD NAME ── */
-    .food-name-cell { display:flex; align-items:center; gap:10px; }
-    .food-emoji { width:34px; height:34px; border-radius:8px; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
-    .food-name-text { font-weight:600; font-size:0.92rem; }
+    #alert-container{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+    .alert-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 20px;border-radius:var(--radius);border:1px solid;border-left:5px solid;animation:slideIn 0.4s ease both;gap:12px;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+    .alert-banner.alert-red{background:#fdeaea;border-color:#f09595;border-left-color:#E24B4A;}
+    .alert-banner.alert-yellow{background:#faeeda;border-color:#FAC775;border-left-color:#BA7517;}
+    .alert-banner.alert-green{background:#e6f7f1;border-color:#9FE1CB;border-left-color:#1D9E75;}
+    .alert-content{flex:1;}
+    .alert-title{font-weight:600;font-size:0.9rem;margin-bottom:2px;}
+    .alert-red .alert-title{color:#A32D2D;}
+    .alert-yellow .alert-title{color:#854F0B;}
+    .alert-green .alert-title{color:#0F6E56;}
+    .alert-message{font-size:0.82rem;}
+    .alert-red .alert-message{color:#b03030;}
+    .alert-yellow .alert-message{color:#a07010;}
+    .alert-green .alert-message{color:#0e7a50;}
+    .alert-dismiss{border:none;padding:5px 12px;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;font-family:'DM Sans',sans-serif;}
+    .alert-dismiss:hover{opacity:0.8;}
+    .alert-red .alert-dismiss{background:#E24B4A;color:#fff;}
+    .alert-yellow .alert-dismiss{background:#BA7517;color:#fff;}
+    .alert-green .alert-dismiss{background:#1D9E75;color:#fff;}
   </style>
 </head>
 <body>
@@ -85,31 +75,14 @@
     <!-- ALERT SYSTEM -->
     <div id="alert-container"></div>
 
-    <!-- SUMMARY CARDS -->
     <div class="summary-cards">
-      <div class="sum-card green">
-        <div class="card-icon">🥬</div>
-        <div class="label">Fresh Items</div>
-        <div class="value" id="count-fresh">—</div>
-      </div>
-      <div class="sum-card yellow">
-        <div class="card-icon">⏳</div>
-        <div class="label">Expiring Soon</div>
-        <div class="value" id="count-soon">—</div>
-      </div>
-      <div class="sum-card red">
-        <div class="card-icon">🚨</div>
-        <div class="label">Expired</div>
-        <div class="value" id="count-expired">—</div>
-      </div>
+      <div class="sum-card green"><div class="label">Fresh Items</div><div class="value" id="count-fresh">0</div></div>
+      <div class="sum-card yellow"><div class="label">Expiring Soon</div><div class="value" id="count-soon">0</div></div>
+      <div class="sum-card red"><div class="label">Expired</div><div class="value" id="count-expired">0</div></div>
     </div>
 
-    <!-- PROGRESS BAR -->
     <div class="progress-section">
-      <div class="progress-label">
-        <span>Food Health Overview</span>
-        <span id="progress-text">Loading...</span>
-      </div>
+      <div class="progress-label"><span>Food Health Overview</span><span id="progress-text">Loading...</span></div>
       <div class="progress-bar-bg">
         <div class="progress-fill green"  id="bar-fresh"   style="width:0%"></div>
         <div class="progress-fill yellow" id="bar-soon"    style="width:0%"></div>
@@ -117,7 +90,6 @@
       </div>
     </div>
 
-    <!-- SEARCH + FILTER -->
     <div class="search-bar">
       <input type="text" id="search-input" placeholder="🔍  Search food items..." oninput="renderTable()" />
       <button class="filter-btn active" id="filter-all"     onclick="setFilter('all')">All</button>
@@ -126,17 +98,11 @@
       <button class="filter-btn red"    id="filter-expired" onclick="setFilter('expired')">🔴 Expired</button>
     </div>
 
-    <!-- TABLE -->
     <div class="table-card">
       <table>
         <thead>
           <tr>
-            <th>Food Name</th>
-            <th>Date Added</th>
-            <th>Est. Expiry</th>
-            <th>Days Left</th>
-            <th>Status</th>
-            <th></th>
+            <th>Food Name</th><th>Date Added</th><th>Est. Expiry</th><th>Days Left</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody id="food-table-body">
@@ -149,7 +115,7 @@
         </tbody>
       </table>
       <div class="empty-state" id="empty-state" style="display:none;">
-        <div style="font-size:3rem">🥗</div>
+        <div style="font-size:2.5rem">🥗</div>
         <p>No food items yet. <a href="add_food.html" style="color:var(--green);font-weight:600;">Add your first item →</a></p>
       </div>
       <div class="no-results" id="no-results" style="display:none;">No items match your search or filter.</div>
@@ -165,6 +131,7 @@
     import { getFirestore, collection, getDocs, deleteDoc, doc }
       from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
+    // ✅ FIREBASE CONFIG (T3)
     const firebaseConfig = {
       apiKey:            "AIzaSyCH3exGIRj84tezVtgKJ9U93ERa6ubgE-w",
       authDomain:        "intellichill.firebaseapp.com",
@@ -176,37 +143,16 @@
 
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
+
+    // ✅ EXACT FIELD NAMES FROM T3
     const COLLECTION = "food_id";
 
     let foodItems     = [];
     let currentFilter = 'all';
 
-    // ── FOOD EMOJI LOOKUP ──
-    function getFoodEmoji(name) {
-      const n = name.toLowerCase();
-      if (n.includes('apple'))    return '🍎';
-      if (n.includes('banana'))   return '🍌';
-      if (n.includes('orange'))   return '🍊';
-      if (n.includes('grape'))    return '🍇';
-      if (n.includes('strawb'))   return '🍓';
-      if (n.includes('watermel')) return '🍉';
-      if (n.includes('mango'))    return '🥭';
-      if (n.includes('lemon'))    return '🍋';
-      if (n.includes('milk'))     return '🥛';
-      if (n.includes('egg'))      return '🥚';
-      if (n.includes('bread'))    return '🍞';
-      if (n.includes('carrot'))   return '🥕';
-      if (n.includes('broccoli')) return '🥦';
-      if (n.includes('tomato'))   return '🍅';
-      if (n.includes('chicken'))  return '🍗';
-      if (n.includes('fish'))     return '🐟';
-      if (n.includes('rice'))     return '🍚';
-      if (n.includes('cheese'))   return '🧀';
-      if (n.includes('butter'))   return '🧈';
-      return '🥫';
-    }
-
-    // ── ALERT SYSTEM ──
+    // =============================================
+    // ALERT SYSTEM
+    // =============================================
     function buildAlerts(fresh, soon, expired, items) {
       const container = document.getElementById('alert-container');
       container.innerHTML = '';
@@ -254,7 +200,9 @@
       container.appendChild(div);
     }
 
-    // ── LOAD FROM FIREBASE ──
+    // =============================================
+    // LOAD DATA FROM FIREBASE
+    // =============================================
     async function loadFromFirebase() {
       try {
         const snapshot = await getDocs(collection(db, COLLECTION));
@@ -277,7 +225,9 @@
       }
     }
 
-    // ── DELETE ──
+    // =============================================
+    // DELETE FROM FIREBASE
+    // =============================================
     window.deleteItem = async function(id) {
       try {
         await deleteDoc(doc(db, COLLECTION, id));
@@ -289,7 +239,9 @@
       }
     };
 
-    // ── HELPERS ──
+    // =============================================
+    // HELPERS
+    // =============================================
     function getStatus(expiryDateStr) {
       if (!expiryDateStr) return { label:"No Expiry", cls:"soon", days:0 };
       const today = new Date(); today.setHours(0,0,0,0);
@@ -321,7 +273,9 @@
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // ── RENDER TABLE ──
+    // =============================================
+    // RENDER TABLE
+    // =============================================
     function renderTable() {
       const tbody      = document.getElementById('food-table-body');
       const emptyState = document.getElementById('empty-state');
@@ -336,11 +290,11 @@
         if (s.cls==='expired') expired++;
       });
 
-      // ✅ FIX: show 0 instead of circle
       document.getElementById('count-fresh').textContent   = fresh;
       document.getElementById('count-soon').textContent    = soon;
       document.getElementById('count-expired').textContent = expired;
 
+      // Build alert banners
       buildAlerts(fresh, soon, expired, foodItems);
 
       const total = foodItems.length || 1;
@@ -372,17 +326,11 @@
       tbody.innerHTML = filtered.map((item, i) => {
         const status = getStatus(item.expiryDate);
         const daysText = status.days < 0
-          ? Math.abs(status.days) + ' days ago'
+          ? Math.abs(status.days)+' days ago'
           : status.days === 0 ? 'Today!'
-          : status.days + ' days';
-        const emoji = getFoodEmoji(item.name);
-        return `<tr style="animation-delay:${i*0.04}s">
-          <td>
-            <div class="food-name-cell">
-              <div class="food-emoji">${emoji}</div>
-              <span class="food-name-text">${item.name}</span>
-            </div>
-          </td>
+          : status.days+' days';
+        return `<tr style="animation-delay:${i*0.05}s">
+          <td><strong>${item.name}</strong></td>
           <td>${formatDate(item.dateAdded)}</td>
           <td>${formatDate(item.expiryDate)}</td>
           <td><span class="days-left">${daysText}</span></td>
@@ -393,7 +341,13 @@
     }
 
     window.renderTable = renderTable;
+
+    // ✅ START — Load data when page opens
     loadFromFirebase();
+
+    // ✅ AUTO-REFRESH every 10 seconds
+    // When Pi camera saves new food to Firebase, dashboard updates automatically!
+    setInterval(loadFromFirebase, 10000);
   </script>
 
 </body>
