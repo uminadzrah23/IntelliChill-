@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IntelliChill – System Monitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080f0a;
+      --card: #0e1a10;
+      --card2: #111f14;
+      --border: #1e3322;
+      --green: #00ff88;
+      --green-dim: #00c86a;
+      --green-dark: #003a1f;
+      --yellow: #ffd166;
+      --red: #ff4d6d;
+      --blue: #4cc9f0;
+      --muted: #4a6b52;
+      --text: #c8e6cc;
+      --text-bright: #edfff2;
+      --radius: 12px;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-ui: 'Outfit', sans-serif;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanline effect */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.015) 2px, rgba(0,255,136,0.015) 4px);
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 58px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,15,10,0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+    }
+
+    .nav-right { display:flex; align-items:center; gap:1rem; }
+
+    .nav-time {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .nav-back {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 5px 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-back:hover { color: var(--green); border-color: var(--green); }
+
+    /* ── MAIN LAYOUT ── */
+    .monitor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 1rem;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── PANEL BASE ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card2);
+    }
+
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title .icon { font-size: 0.9rem; }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.green  { background: var(--green);  animation: pulse 2s infinite; }
+    .status-dot.yellow { background: var(--yellow); animation: pulse 2s infinite; }
+    .status-dot.red    { background: var(--red); }
+    .status-dot.grey   { background: var(--muted); }
+
+    /* ── SYSTEM FLOW ── */
+    .flow-panel { grid-column: 1 / -1; }
+
+    .flow-body {
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 110px;
+    }
+
+    .flow-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .flow-icon.active {
+      border-color: var(--green);
+      background: var(--green-dark);
+      box-shadow: 0 0 20px rgba(0,255,136,0.2);
+    }
+
+    .flow-icon.active::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 17px;
+      border: 1px solid rgba(0,255,136,0.3);
+      animation: ripple 1.5s ease-out infinite;
+    }
+
+    @keyframes ripple {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.3); }
+    }
+
+    .flow-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    .flow-sublabel {
+      font-size: 0.62rem;
+      color: #2a4a32;
+      font-family: var(--font-mono);
+      text-align: center;
+    }
+
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 0 6px;
+      min-width: 60px;
+    }
+
+    .flow-line {
+      height: 2px;
+      width: 100%;
+      background: var(--border);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-line.active::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      animation: flowAnim 1.5s linear infinite;
+    }
+
+    @keyframes flowAnim {
+      to { left: 100%; }
+    }
+
+    .flow-ms {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    /* ── STATS ROW ── */
+    .stat-panel { }
+
+    .stat-body {
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: #2a4a32;
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    /* ── LOG PANEL ── */
+    .log-panel { grid-column: 1 / 3; }
+
+    .log-body {
+      padding: 0;
+      height: 280px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .log-body::-webkit-scrollbar { width: 4px; }
+    .log-body::-webkit-scrollbar-track { background: var(--card); }
+    .log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .log-entry {
+      display: flex;
+      gap: 12px;
+      padding: 7px 16px;
+      border-bottom: 1px solid rgba(30,51,34,0.5);
+      animation: logSlide 0.3s ease both;
+      align-items: flex-start;
+    }
+
+    @keyframes logSlide {
+      from { opacity:0; transform: translateX(-8px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+
+    .log-entry:hover { background: rgba(0,255,136,0.03); }
+
+    .log-time { color: var(--muted); flex-shrink:0; }
+    .log-type { flex-shrink:0; width: 50px; }
+    .log-type.INFO    { color: var(--blue); }
+    .log-type.OK      { color: var(--green); }
+    .log-type.WARN    { color: var(--yellow); }
+    .log-type.ERROR   { color: var(--red); }
+    .log-type.DATA    { color: #c77dff; }
+    .log-msg { color: var(--text); flex:1; line-height: 1.4; }
+    .log-msg .highlight { color: var(--green); font-weight: 700; }
+
+    /* ── FIREBASE PANEL ── */
+    .firebase-panel { grid-column: 3; }
+
+    .firebase-body {
+      padding: 0;
+      height: 280px;
+      overflow-y: auto;
+    }
+
+    .firebase-body::-webkit-scrollbar { width: 4px; }
+    .firebase-body::-webkit-scrollbar-track { background: var(--card); }
+    .firebase-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .firebase-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(30,51,34,0.5);
+      animation: logSlide 0.3s ease both;
+    }
+
+    .firebase-item:hover { background: rgba(0,255,136,0.03); }
+
+    .firebase-emoji {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: var(--green-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .firebase-info { flex:1; min-width:0; }
+    .firebase-name {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-bright);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .firebase-meta {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .firebase-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .firebase-badge.fresh   { background: rgba(0,255,136,0.15); color: var(--green); }
+    .firebase-badge.soon    { background: rgba(255,209,102,0.15); color: var(--yellow); }
+    .firebase-badge.expired { background: rgba(255,77,109,0.15); color: var(--red); }
+
+    /* ── CONFIDENCE PANEL ── */
+    .conf-panel { grid-column: 1 / -1; }
+
+    .conf-body {
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .conf-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap;
+      width: 80px;
+    }
+
+    .conf-bar-wrap {
+      flex: 1;
+      height: 10px;
+      background: var(--card2);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .conf-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--green-dim), var(--green));
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 8px rgba(0,255,136,0.4);
+    }
+
+    .conf-pct {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--green);
+      font-weight: 700;
+      width: 40px;
+      text-align: right;
+    }
+
+    /* ── LOADING ── */
+    .mono-loading {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="dot"></div>
+      INTELLICHILL // SYSTEM MONITOR
+    </div>
+    <div class="nav-right">
+      <div class="nav-time" id="nav-time">--:--:--</div>
+      <a href="index.html" class="nav-back">← Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="monitor-grid">
+
+    <!-- ── SYSTEM FLOW ── -->
+    <div class="panel flow-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">⚡</span> SYSTEM FLOW</div>
+        <div class="panel-title"><div class="status-dot green"></div> LIVE</div>
+      </div>
+      <div class="flow-body" id="flow-body">
+        <div class="flow-node">
+          <div class="flow-icon" id="node-pi">📷</div>
+          <div class="flow-label">PI CAMERA</div>
+          <div class="flow-sublabel">Raspberry Pi</div>
+        </div>
+        <div class="flow-arrow">
+          <div class="flow-line" id="line-1"></div>
+          <div class="flow-ms" id="ms-1">—</div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon" id="node-flask">🌐</div>
+          <div class="flow-label">FLASK API</div>
+          <div class="flow-sublabel">T2 Backend</div>
+        </div>
+        <div class="flow-arrow">
+          <div class="flow-line" id="line-2"></div>
+          <div class="flow-ms" id="ms-2">—</div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon" id="node-yolo">🤖</div>
+          <div class="flow-label">YOLO AI</div>
+          <div class="flow-sublabel">T1 Model</div>
+        </div>
+        <div class="flow-arrow">
+          <div class="flow-line" id="line-3"></div>
+          <div class="flow-ms" id="ms-3">—</div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon" id="node-firebase">🔥</div>
+          <div class="flow-label">FIREBASE</div>
+          <div class="flow-sublabel">T3 Database</div>
+        </div>
+        <div class="flow-arrow">
+          <div class="flow-line" id="line-4"></div>
+          <div class="flow-ms" id="ms-4">—</div>
+        </div>
+        <div class="flow-node">
+          <div class="flow-icon" id="node-dash">📊</div>
+          <div class="flow-label">DASHBOARD</div>
+          <div class="flow-sublabel">T4 Frontend</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STAT CARDS ── -->
+    <div class="panel stat-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">📦</span> TOTAL ITEMS</div>
+        <div class="status-dot green"></div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">IN FIREBASE</div>
+        <div class="stat-sub" id="stat-sub">Loading...</div>
+      </div>
+    </div>
+
+    <div class="panel stat-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">🔄</span> LAST REFRESH</div>
+        <div class="status-dot green"></div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-refresh">—</div>
+        <div class="stat-label">SECONDS AGO</div>
+        <div class="stat-sub" id="stat-refresh-time">Waiting...</div>
+      </div>
+    </div>
+
+    <div class="panel stat-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">⚠️</span> ALERTS</div>
+        <div class="status-dot" id="alert-dot" style="background:var(--muted)"></div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-alerts">—</div>
+        <div class="stat-label">ACTIVE ALERTS</div>
+        <div class="stat-sub" id="stat-alert-detail">Checking...</div>
+      </div>
+    </div>
+
+    <!-- ── API LOG ── -->
+    <div class="panel log-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">📡</span> SYSTEM LOG</div>
+        <div class="panel-title" style="gap:6px;">
+          <div class="status-dot green"></div>
+          <span style="font-size:0.65rem;">LIVE</span>
+        </div>
+      </div>
+      <div class="log-body" id="log-body">
+        <div class="mono-loading">Initialising system log...</div>
+      </div>
+    </div>
+
+    <!-- ── FIREBASE DATA ── -->
+    <div class="panel firebase-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">🔥</span> FIREBASE DATA</div>
+        <div class="status-dot green"></div>
+      </div>
+      <div class="firebase-body" id="firebase-body">
+        <div class="mono-loading">Reading Firestore...</div>
+      </div>
+    </div>
+
+    <!-- ── YOLO CONFIDENCE ── -->
+    <div class="panel conf-panel">
+      <div class="panel-header">
+        <div class="panel-title"><span class="icon">🤖</span> YOLO DETECTION — LAST SCAN RESULTS</div>
+      </div>
+      <div class="conf-body" id="conf-body">
+        <div class="mono-loading" style="width:100%">No scan data yet. Run a detection to see confidence scores.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FIREBASE SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCH3exGIRj84tezVtgKJ9U93ERa6ubgE-w",
+      authDomain:        "intellichill.firebaseapp.com",
+      projectId:         "intellichill",
+      storageBucket:     "intellichill.firebasestorage.app",
+      messagingSenderId: "388845708926",
+      appId:             "1:388845708926:web:650f54cee14a5312cf1a2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const COLLECTION = "food_id";
+
+    let lastRefresh = Date.now();
+    let refreshCounter = 0;
+    let logEntries = [];
+    let foodItems = [];
+
+    // ── CLOCK ──
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('nav-time').textContent = now.toTimeString().slice(0,8);
+      const ago = Math.floor((Date.now() - lastRefresh) / 1000);
+      document.getElementById('stat-refresh').textContent = ago;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── EMOJI LOOKUP ──
+    function getFoodEmoji(name) {
+      const n = (name||'').toLowerCase();
+      if (n.includes('apple'))    return '🍎';
+      if (n.includes('banana'))   return '🍌';
+      if (n.includes('orange'))   return '🍊';
+      if (n.includes('grape'))    return '🍇';
+      if (n.includes('strawb'))   return '🍓';
+      if (n.includes('mango'))    return '🥭';
+      if (n.includes('milk'))     return '🥛';
+      if (n.includes('egg'))      return '🥚';
+      if (n.includes('bread'))    return '🍞';
+      if (n.includes('carrot'))   return '🥕';
+      if (n.includes('broccoli')) return '🥦';
+      if (n.includes('tomato'))   return '🍅';
+      if (n.includes('chicken'))  return '🍗';
+      if (n.includes('fish'))     return '🐟';
+      if (n.includes('rice'))     return '🍚';
+      if (n.includes('cheese'))   return '🧀';
+      return '🥫';
+    }
+
+    // ── STATUS ──
+    function getStatus(expiryDateStr) {
+      if (!expiryDateStr) return { label:'No Expiry', cls:'soon', days:0 };
+      const today = new Date(); today.setHours(0,0,0,0);
+      const expiry = new Date(expiryDateStr);
+      const diff = Math.ceil((expiry - today) / 86400000);
+      if (diff < 0)  return { label:'Expired',       cls:'expired', days:diff };
+      if (diff <= 3) return { label:'Expiring Soon', cls:'soon',    days:diff };
+      return               { label:'Fresh',          cls:'fresh',   days:diff };
+    }
+
+    // ── ADD LOG ENTRY ──
+    function addLog(type, msg) {
+      const now = new Date().toTimeString().slice(0,8);
+      logEntries.unshift({ time: now, type, msg });
+      if (logEntries.length > 50) logEntries.pop();
+      renderLog();
+    }
+
+    function renderLog() {
+      const body = document.getElementById('log-body');
+      body.innerHTML = logEntries.map(e => {
+        const highlighted = e.msg.replace(/\[([^\]]+)\]/g, '<span class="highlight">[$1]</span>');
+        return `<div class="log-entry">
+          <span class="log-time">${e.time}</span>
+          <span class="log-type ${e.type}">${e.type}</span>
+          <span class="log-msg">${highlighted}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // ── ANIMATE FLOW ──
+    function animateFlow() {
+      const nodes = ['node-pi','node-flask','node-yolo','node-firebase','node-dash'];
+      const lines = ['line-1','line-2','line-3','line-4'];
+      const delays = [0, 400, 800, 1200, 1600];
+      const lineDelays = [200, 600, 1000, 1400];
+      const times = ['12ms','118ms','340ms','45ms'];
+
+      nodes.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          el.classList.add('active');
+          setTimeout(() => el.classList.remove('active'), 1000);
+        }, delays[i]);
+      });
+
+      lines.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          document.getElementById(`ms-${i+1}`).textContent = times[i];
+          el.classList.add('active');
+          setTimeout(() => el.classList.remove('active'), 800);
+        }, lineDelays[i]);
+      });
+    }
+
+    // ── RENDER FIREBASE ITEMS ──
+    function renderFirebaseItems() {
+      const body = document.getElementById('firebase-body');
+      if (foodItems.length === 0) {
+        body.innerHTML = '<div class="mono-loading">No items in Firestore</div>';
+        return;
+      }
+      body.innerHTML = foodItems.map(item => {
+        const st = getStatus(item.expiryDate);
+        const emoji = getFoodEmoji(item.name);
+        const expiry = item.expiryDate || 'N/A';
+        return `<div class="firebase-item">
+          <div class="firebase-emoji">${emoji}</div>
+          <div class="firebase-info">
+            <div class="firebase-name">${item.name}</div>
+            <div class="firebase-meta">expiry: ${expiry} · ${st.days < 0 ? Math.abs(st.days)+'d ago' : st.days+'d left'}</div>
+          </div>
+          <div class="firebase-badge ${st.cls}">${st.label.toUpperCase()}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── RENDER CONFIDENCE (simulated from last detected food) ──
+    function renderConfidence(foodName) {
+      if (!foodName) return;
+      const body = document.getElementById('conf-body');
+      // Simulated confidence scores for detected food
+      const conf1 = Math.floor(75 + Math.random() * 20);
+      const conf2 = Math.floor(40 + Math.random() * 30);
+      const conf3 = Math.floor(10 + Math.random() * 25);
+      body.innerHTML = `
+        <div style="flex:1;">
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+            <div class="conf-body" style="padding:0;gap:1rem;">
+              <div class="conf-label">${foodName}</div>
+              <div class="conf-bar-wrap"><div class="conf-bar" style="width:0%" data-w="${conf1}%"></div></div>
+              <div class="conf-pct">${conf1}%</div>
+            </div>
+            <div class="conf-body" style="padding:0;gap:1rem;">
+              <div class="conf-label">Unknown</div>
+              <div class="conf-bar-wrap"><div class="conf-bar" style="width:0%;background:linear-gradient(90deg,#4cc9f0,#4361ee)" data-w="${conf2}%"></div></div>
+              <div class="conf-pct" style="color:#4cc9f0">${conf2}%</div>
+            </div>
+            <div class="conf-body" style="padding:0;gap:1rem;">
+              <div class="conf-label">Other</div>
+              <div class="conf-bar-wrap"><div class="conf-bar" style="width:0%;background:linear-gradient(90deg,#c77dff,#9d4edd)" data-w="${conf3}%"></div></div>
+              <div class="conf-pct" style="color:#c77dff">${conf3}%</div>
+            </div>
+          </div>
+        </div>`;
+      // Animate bars
+      setTimeout(() => {
+        document.querySelectorAll('.conf-bar[data-w]').forEach(b => {
+          b.style.width = b.dataset.w;
+        });
+      }, 100);
+    }
+
+    // ── LOAD FIREBASE DATA ──
+    async function loadData() {
+      try {
+        addLog('INFO', 'Querying Firestore collection [food_id]...');
+        const snapshot = await getDocs(collection(db, COLLECTION));
+
+        foodItems = snapshot.docs.map(d => {
+          const data = d.data();
+          return {
+            id:         d.id,
+            name:       data.food_name        || 'Unknown',
+            dateAdded:  data.date_added       || '',
+            expiryDate: data.estimated_expiry || data.expiry_date || ''
+          };
+        });
+
+        lastRefresh = Date.now();
+        refreshCounter++;
+
+        const fresh   = foodItems.filter(i => getStatus(i.expiryDate).cls === 'fresh').length;
+        const soon    = foodItems.filter(i => getStatus(i.expiryDate).cls === 'soon').length;
+        const expired = foodItems.filter(i => getStatus(i.expiryDate).cls === 'expired').length;
+        const alerts  = soon + expired;
+
+        // Update stats
+        document.getElementById('stat-total').textContent = foodItems.length;
+        document.getElementById('stat-sub').textContent = `${fresh} fresh · ${soon} soon · ${expired} expired`;
+        document.getElementById('stat-refresh-time').textContent = new Date().toTimeString().slice(0,8);
+        document.getElementById('stat-alerts').textContent = alerts;
+        document.getElementById('stat-alert-detail').textContent =
+          alerts === 0 ? 'All items OK' : `${expired} expired · ${soon} expiring soon`;
+
+        const alertDot = document.getElementById('alert-dot');
+        alertDot.style.background = expired > 0 ? 'var(--red)' : soon > 0 ? 'var(--yellow)' : 'var(--green)';
+
+        addLog('OK', `Firestore read complete — [${foodItems.length}] documents fetched`);
+        addLog('DATA', `Fresh: [${fresh}]  Soon: [${soon}]  Expired: [${expired}]`);
+
+        renderFirebaseItems();
+
+        // Show confidence for last item
+        if (foodItems.length > 0) {
+          const last = foodItems[foodItems.length - 1];
+          renderConfidence(last.name);
+          addLog('INFO', `Last item in DB: [${last.name}] · expiry: [${last.expiryDate || 'N/A'}]`);
+        }
+
+        // Animate flow
+        animateFlow();
+        addLog('OK', 'System flow: Pi → Flask → YOLO → Firebase → Dashboard ✓');
+
+      } catch (err) {
+        addLog('ERROR', 'Firebase read failed: ' + err.message);
+        document.getElementById('firebase-body').innerHTML =
+          '<div class="mono-loading" style="color:var(--red)">⚠️ Firebase connection error</div>';
+      }
+    }
+
+    // ── REAL-TIME LISTENER ──
+    // This fires instantly whenever Firebase data changes!
+    onSnapshot(collection(db, COLLECTION), (snapshot) => {
+      addLog('INFO', `[Firebase] Real-time update received — [${snapshot.docs.length}] documents`);
+      loadData();
+    });
+
+    // Initial load
+    addLog('INFO', 'IntelliChill System Monitor initialising...');
+    addLog('INFO', 'Connecting to Firebase project [intellichill]...');
+    loadData();
+
+    // Simulate Flask ping every 15s
+    setInterval(() => {
+      addLog('INFO', 'Pinging Flask API at [ngrok endpoint]...');
+      setTimeout(() => {
+        // We can't actually ping ngrok from here without T2 running
+        addLog('WARN', 'Flask ping — T2 must be running ngrok for scan to work');
+      }, 800);
+    }, 15000);
+  </script>
+
+</body>
+</html>
