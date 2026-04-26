@@ -6,18 +6,16 @@
   <title>FoodTrack – Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ── SEARCH & FILTER ── */
     .search-bar { display:flex; align-items:center; gap:10px; margin-bottom:1.5rem; }
-    .search-bar input { flex:1; padding:11px 18px; border:1px solid var(--border); border-radius:999px; font-family:'Outfit',sans-serif; font-size:0.9rem; background:var(--card); color:var(--text); outline:none; transition:all 0.2s; box-shadow:var(--shadow); }
+    .search-bar input { flex:1; padding:11px 18px; border:1px solid var(--border); border-radius:999px; font-family:'Outfit',sans-serif; font-size:0.9rem; outline:none; transition:border 0.2s, box-shadow 0.2s; }
     .search-bar input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(22,163,127,0.12); }
-    .filter-btn { padding:9px 18px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-family:'Outfit',sans-serif; font-size:0.83rem; font-weight:500; cursor:pointer; color:var(--muted); transition:all 0.2s; box-shadow:var(--shadow); white-space:nowrap; }
+    .filter-btn { padding:9px 18px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-family:'Outfit',sans-serif; font-size:0.85rem; cursor:pointer; transition:all 0.2s; }
     .filter-btn:hover { border-color:var(--green); color:var(--green); }
     .filter-btn.active { background:var(--nav-bg); color:#fff; border-color:var(--nav-bg); }
     .filter-btn.green.active  { background:var(--green);  border-color:var(--green);  color:#fff; }
     .filter-btn.yellow.active { background:var(--yellow); border-color:var(--yellow); color:#fff; }
     .filter-btn.red.active    { background:var(--red);    border-color:var(--red);    color:#fff; }
 
-    /* ── ANIMATIONS ── */
     .sum-card { animation:fadeUp 0.5s ease both; }
     .sum-card:nth-child(1) { animation-delay:0.08s; }
     .sum-card:nth-child(2) { animation-delay:0.16s; }
@@ -26,28 +24,24 @@
     tbody tr { animation:fadeIn 0.3s ease both; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
-    /* ── DELETE BUTTON ── */
     .btn-delete { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:6px 10px; border-radius:8px; transition:all 0.2s; }
     .btn-delete:hover { background:var(--red-light); color:var(--red); }
     .days-left { font-size:0.8rem; color:var(--muted); font-weight:500; }
 
-    /* ── TOAST ── */
-    #toast { position:fixed; bottom:28px; right:28px; background:var(--nav-bg); color:#fff; padding:13px 22px; border-radius:999px; font-size:0.88rem; font-weight:500; opacity:0; transform:translateY(12px); transition:all 0.3s ease; z-index:999; pointer-events:none; box-shadow:var(--shadow-lg); }
+    #toast { position:fixed; bottom:28px; right:28px; background:var(--nav-bg); color:#fff; padding:13px 22px; border-radius:999px; font-size:0.88rem; font-weight:600; opacity:0; transform:translateY(10px); transition:all 0.3s; pointer-events:none; z-index:999; }
     #toast.show { opacity:1; transform:translateY(0); }
 
-    /* ── EMPTY / LOADING ── */
     .no-results { text-align:center; padding:2.5rem; color:var(--muted); font-size:0.9rem; }
     .loading-state { text-align:center; padding:3.5rem; color:var(--muted); font-size:0.9rem; }
-    .spinner { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 14px; }
+    .spinner { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 1rem; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* ── ALERT SYSTEM ── */
     #alert-container { display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem; }
-    .alert-banner { display:flex; align-items:center; justify-content:space-between; padding:13px 18px 13px 20px; border-radius:var(--radius-sm); border-left:4px solid; animation:slideIn 0.4s ease both; gap:14px; box-shadow:var(--shadow); }
+    .alert-banner { display:flex; align-items:center; justify-content:space-between; padding:13px 18px 13px 20px; border-radius:var(--radius-sm); animation:slideIn 0.3s ease; }
     @keyframes slideIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
-    .alert-banner.alert-red    { background:#fff5f5; border-left-color:var(--red); border:1px solid #fecaca; border-left:4px solid var(--red); }
-    .alert-banner.alert-yellow { background:#fffbeb; border-left-color:var(--yellow); border:1px solid #fde68a; border-left:4px solid var(--yellow); }
-    .alert-banner.alert-green  { background:#f0fdf8; border-left-color:var(--green); border:1px solid var(--green-mid); border-left:4px solid var(--green); }
+    .alert-banner.alert-red    { background:#fff5f5; border:1px solid #fecaca; border-left:4px solid var(--red); }
+    .alert-banner.alert-yellow { background:#fffbeb; border:1px solid #fde68a; border-left:4px solid var(--yellow); }
+    .alert-banner.alert-green  { background:#f0fdf8; border:1px solid var(--green-mid); border-left:4px solid var(--green); }
     .alert-content { flex:1; }
     .alert-title { font-weight:700; font-size:0.88rem; margin-bottom:2px; }
     .alert-red .alert-title    { color:#991b1b; }
@@ -57,23 +51,36 @@
     .alert-red .alert-message    { color:#b91c1c; }
     .alert-yellow .alert-message { color:#b45309; }
     .alert-green .alert-message  { color:#047857; }
-    .alert-dismiss { border:none; padding:5px 14px; border-radius:999px; font-size:0.76rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s; font-family:'Outfit',sans-serif; }
+    .alert-dismiss { border:none; padding:5px 14px; border-radius:999px; font-size:0.76rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s; margin-left:12px; }
     .alert-dismiss:hover { opacity:0.85; transform:scale(0.97); }
     .alert-red .alert-dismiss    { background:var(--red);    color:#fff; }
     .alert-yellow .alert-dismiss { background:var(--yellow); color:#fff; }
     .alert-green .alert-dismiss  { background:var(--green);  color:#fff; }
 
-    /* ── TABLE FOOD NAME ── */
     .food-name-cell { display:flex; align-items:center; gap:10px; }
-    .food-emoji { width:34px; height:34px; border-radius:8px; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .food-emoji { width:34px; height:34px; border-radius:8px; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
     .food-name-text { font-weight:600; font-size:0.92rem; }
+
+    /* Scan result modal */
+    #scan-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }
+    #scan-modal.open { display:flex; }
+    #scan-modal-box { background:#fff; border-radius:16px; padding:2rem; max-width:360px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+    #scan-modal-box h2 { margin:0 0 0.5rem; font-size:1.3rem; }
+    #scan-modal-box p  { color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem; }
+    #scan-modal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    #scan-modal-actions button { padding:10px 22px; border-radius:999px; border:none; cursor:pointer; font-family:'Outfit',sans-serif; font-weight:600; font-size:0.9rem; transition:all 0.2s; }
+    #btn-add-detected   { background:var(--green); color:#fff; }
+    #btn-add-detected:hover { opacity:0.85; }
+    #btn-dismiss-modal  { background:var(--border); color:var(--text); }
+    #btn-dismiss-modal:hover { background:#ddd; }
   </style>
 </head>
 <body>
-
   <nav>
     <div class="logo">🥦 Food<span>Track</span></div>
-    <a href="add_food.html" class="nav-btn">+ Add Food</a>
+    <button id="scan-btn" onclick="scanFood()" style="background-color:#2563eb;color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;font-size:0.9rem;transition:all 0.2s;">
+      📷 Scan Food
+    </button>
   </nav>
 
   <div class="page">
@@ -156,9 +163,22 @@
     </div>
   </div>
 
+  <!-- SCAN RESULT MODAL -->
+  <div id="scan-modal">
+    <div id="scan-modal-box">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem" id="scan-emoji">🥫</div>
+      <h2 id="scan-food-name">—</h2>
+      <p id="scan-confidence">Confidence: —</p>
+      <div id="scan-modal-actions">
+        <button id="btn-add-detected" onclick="goToAddFood()">➕ Add to Inventory</button>
+        <button id="btn-dismiss-modal" onclick="closeModal()">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
-  <!-- ✅ FIREBASE SDK -->
+  <!-- FIREBASE SDK -->
   <script type="module">
     import { initializeApp }
       from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -174,16 +194,15 @@
       appId:             "1:388845708926:web:650f54cee14a5312cf1a2f"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
+    const app2 = initializeApp(firebaseConfig);
+    const db   = getFirestore(app2);
     const COLLECTION = "food_id";
-
-    let foodItems     = [];
+    window.foddItems = [];
     let currentFilter = 'all';
 
-    // ── FOOD EMOJI LOOKUP ──
+    // ── FOOD EMOJI ──
     function getFoodEmoji(name) {
-      const n = name.toLowerCase();
+      const n = (name || '').toLowerCase();
       if (n.includes('apple'))    return '🍎';
       if (n.includes('banana'))   return '🍌';
       if (n.includes('orange'))   return '🍊';
@@ -206,7 +225,7 @@
       return '🥫';
     }
 
-    // ── ALERT SYSTEM ──
+    // ── ALERTS ──
     function buildAlerts(fresh, soon, expired, items) {
       const container = document.getElementById('alert-container');
       container.innerHTML = '';
@@ -254,11 +273,11 @@
       container.appendChild(div);
     }
 
-    // ── LOAD FROM FIREBASE ──
+    // ── LOAD FIREBASE ──
     async function loadFromFirebase() {
       try {
         const snapshot = await getDocs(collection(db, COLLECTION));
-        foodItems = snapshot.docs.map(docSnap => {
+        window.foodItems = snapshot.docs.map(docSnap => {
           const d = docSnap.data();
           return {
             id:         docSnap.id,
@@ -336,7 +355,6 @@
         if (s.cls==='expired') expired++;
       });
 
-      // ✅ FIX: show 0 instead of circle
       document.getElementById('count-fresh').textContent   = fresh;
       document.getElementById('count-soon').textContent    = soon;
       document.getElementById('count-expired').textContent = expired;
@@ -361,13 +379,17 @@
         noResults.style.display  = 'none';
         tbody.innerHTML = '';
         return;
-      } else { emptyState.style.display = 'none'; }
+      } else {
+        emptyState.style.display = 'none';
+      }
 
       if (filtered.length === 0) {
         noResults.style.display = 'block';
         tbody.innerHTML = '';
         return;
-      } else { noResults.style.display = 'none'; }
+      } else {
+        noResults.style.display = 'none';
+      }
 
       tbody.innerHTML = filtered.map((item, i) => {
         const status = getStatus(item.expiryDate);
@@ -393,8 +415,122 @@
     }
 
     window.renderTable = renderTable;
+    window.getFoodEmoji = getFoodEmoji;
     loadFromFirebase();
   </script>
 
+  <!-- SCAN FOOD (must be outside module script) -->
+<script>
+  let detectedFoodName = '';
+
+  // 🔔 Notification system
+  let notifiedItems = new Set();
+
+  function requestNotificationPermission() {
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        console.log("Notification permission:", permission);
+      });
+    }
+  }
+
+  function sendNotification(title, body) {
+    if (Notification.permission === "granted") {
+      const notif = new Notification(title, {
+        body: body,
+        icon: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png"
+      });
+
+      notif.onclick = () => {
+        window.focus();
+      };
+    }
+  }
+
+  function checkExpiryNotifications(items) {
+    if (!window.getStatus) return;
+
+    items.forEach(item => {
+      const status = window.getStatus(item.expiryDate);
+      const key = item.id + "-" + status.cls;
+
+      if (notifiedItems.has(key)) return;
+
+      // 🔴 Expired
+      if (status.cls === 'expired') {
+        sendNotification(
+          "🚨 Food Expired!",
+          item.name + " expired " + Math.abs(status.days) + " day(s) ago"
+        );
+        notifiedItems.add(key);
+      }
+
+      // 🟡 Expiring soon (0–2 days)
+      if (status.cls === 'soon' && status.days >= 0 && status.days <= 2) {
+        sendNotification(
+          "⚠️ Expiring Soon!",
+          item.name + " expires in " + status.days + " day(s)"
+        );
+        notifiedItems.add(key);
+      }
+    });
+  }
+
+  function scanFood() {
+    const btn = document.getElementById('scan-btn');
+    btn.textContent = '⏳ Scanning...';
+    btn.disabled = true;
+
+    fetch('/scan')
+      .then(res => res.json())
+      .then(data => {
+        btn.textContent = '📷 Scan Food';
+        btn.disabled = false;
+
+        if (data.error) {
+          alert('⚠️ Error: ' + data.error);
+          return;
+        }
+
+        if (data.food) {
+          detectedFoodName = data.food;
+          const emoji = (window.getFoodEmoji && window.getFoodEmoji(data.food)) || '🥫';
+
+          document.getElementById('scan-emoji').textContent     = emoji;
+          document.getElementById('scan-food-name').textContent = data.food;
+          document.getElementById('scan-confidence').textContent =
+            'Confidence: ' + Math.round(data.confidence * 100) + '%';
+
+          document.getElementById('scan-modal').classList.add('open');
+        } else {
+          alert('🔍 No food detected. Try again with better lighting.');
+        }
+      })
+      .catch(() => {
+        btn.textContent = '📷 Scan Food';
+        btn.disabled = false;
+        alert('❌ Cannot connect to camera server. Make sure app.py is running.');
+      });
+  }
+
+  function closeModal() {
+    document.getElementById('scan-modal').classList.remove('open');
+  }
+
+  function goToAddFood() {
+    closeModal();
+    window.location.href = 'add_food.html?food=' + encodeURIComponent(detectedFoodName);
+  }
+
+  // 🚀 INIT
+  requestNotificationPermission();
+
+  // Run every 60 seconds
+  setInterval(() => {
+    if (window.foodItems && window.foodItems.length > 0) {
+      checkExpiryNotifications(window.foodItems);
+    }
+  }, 60000);
+</script>
 </body>
 </html>
